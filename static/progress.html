@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitnessAGNT – Progression History</title>
+    <meta name="description" content="Track your fitness machine learning predictions over time." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Chart.js for Progression Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-2);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            text-decoration: none;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-1);
+        }
+    </style>
+</head>
+
+<body class="dashboard-page">
+
+    <!-- Animated background -->
+    <div class="bg-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Top Nav -->
+    <nav class="top-nav">
+        <a href="dashboard.html" class="nav-brand" style="text-decoration:none;">
+            <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" stroke="url(#dn1)" stroke-width="2.5" />
+                <path d="M14 24h4l3-8 4 16 3-10 2 2h4" stroke="url(#dn2)" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <defs>
+                    <linearGradient id="dn1" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                    <linearGradient id="dn2" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            FitnessAGNT
+        </a>
+        <div class="nav-user">
+            <div class="user-badge" id="user-badge">
+                <div class="user-avatar-icon" id="user-avatar-initial">?</div>
+                <span id="username-display">Loading...</span>
+            </div>
+            <button class="btn-logout" id="btn-logout" onclick="logout()">Sign Out</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div style="max-width: 1200px; margin: 40px auto 60px; padding: 0 5%; width: 100%; position: relative; z-index: 1;">
+        
+        <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+
+        <div class="dash-hero" style="padding-top: 10px; padding-bottom: 40px; text-align: left;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 12px; background: linear-gradient(135deg, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Progression History</h1>
+            <p style="color: var(--text-2); font-size: 1.1rem; max-width: 600px;">Review your tracked predictions over time. Hover over the points to see exactly when these calculations were generated.</p>
+        </div>
+        
+        <div id="progress-empty" class="hidden" style="text-align: center; padding: 60px 40px; background: rgba(255,255,255,0.02); border-radius: 12px; color: var(--text-3); border: 1px dashed rgba(255,255,255,0.1);">
+            <div style="font-size: 3rem; margin-bottom: 16px;">📈</div>
+            <h3 style="color: var(--text-1); font-size: 1.2rem; margin-bottom: 8px;">No Data Found</h3>
+            <p>Use the models on the dashboard to make predictions. Your history charts will appear here automatically!</p>
+            <a href="dashboard.html" class="btn-predict" style="display: inline-block; margin-top: 24px; padding: 12px 24px; text-decoration: none;">Return to Models</a>
+        </div>
+
+        <div id="progress-charts" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px;">
+            
+            <!-- Recovery Chart -->
+            <div class="dash-card glass" style="display: flex; flex-direction: column; cursor: default; padding: 28px; height: 360px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #00e5ff;">Muscle Recovery Trend</h3>
+                <p style="font-size: 0.85rem; color: var(--text-3); margin-bottom: 20px;">Predicted hours needed until full recovery</p>
+                <div style="position: relative; flex: 1; width: 100%;">
+                    <canvas id="chart-user-recovery"></canvas>
+                </div>
+            </div>
+
+            <!-- Calories Chart -->
+            <div class="dash-card glass" style="display: flex; flex-direction: column; cursor: default; padding: 28px; height: 360px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #f97316;">Daily Calorie Goal Trend</h3>
+                <p style="font-size: 0.85rem; color: var(--text-3); margin-bottom: 20px;">Recommended TDEE calorie target</p>
+                <div style="position: relative; flex: 1; width: 100%;">
+                    <canvas id="chart-user-calories"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/progress.js"></script>
+</body>
+</html>

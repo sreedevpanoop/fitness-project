@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitnessAGNT – Admin Dashboard</title>
+  <meta name="description" content="FitnessAGNT admin panel — user management and analytics." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body class="admin-page">
+
+  <div class="bg-particles" aria-hidden="true">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- ── Top Nav ── -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="22" stroke="url(#an1)" stroke-width="2.5"/>
+        <path d="M24 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm-8 18c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="url(#an2)" stroke-width="2.5" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="an1" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse"><stop stop-color="#00e5ff"/><stop offset="1" stop-color="#a855f7"/></linearGradient>
+          <linearGradient id="an2" x1="14" y1="14" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#00e5ff"/><stop offset="1" stop-color="#a855f7"/></linearGradient>
+        </defs>
+      </svg>
+      FitnessAGNT – Admin
+    </div>
+    <div class="nav-user">
+      <div class="user-badge">
+        <span class="dot admin-dot"></span>
+        <span id="admin-name-display">Administrator</span>
+      </div>
+      <button class="btn-logout" onclick="adminLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <div class="admin-hero">
+    <h2>Admin Dashboard</h2>
+    <p>Platform overview, real-time analytics, and user management for FitnessAGNT</p>
+  </div>
+
+  <!-- ── Stat Cards ── -->
+  <div class="admin-stats-grid">
+    <div class="admin-stat-card glass">
+      <div class="astat-icon users-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div><div class="astat-num" id="stat-total-users">--</div><div class="astat-label">Total Users</div></div>
+    </div>
+    <div class="admin-stat-card glass">
+      <div class="astat-icon preds-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div><div class="astat-num" id="stat-total-preds">--</div><div class="astat-label">Total Predictions</div></div>
+    </div>
+    <div class="admin-stat-card glass">
+      <div class="astat-icon active-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div><div class="astat-num" id="stat-verified">--</div><div class="astat-label">Verified Users</div></div>
+    </div>
+    <div class="admin-stat-card glass">
+      <div class="astat-icon" style="background:rgba(16,185,129,0.12);color:#10b981;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div><div class="astat-num" id="stat-avg-preds">--</div><div class="astat-label">Avg Predictions/User</div></div>
+    </div>
+  </div>
+
+  <!-- ── Charts Row 1: Signups + Model Usage ── -->
+  <div class="admin-charts-row">
+    <div class="admin-chart-card glass">
+      <div class="chart-header">
+        <h3>Daily Signups <span class="chart-sub">(last 30 days)</span></h3>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-signups"></canvas>
+      </div>
+    </div>
+    <div class="admin-chart-card glass" style="max-width:320px;">
+      <div class="chart-header">
+        <h3>Predictions by Model</h3>
+      </div>
+      <div class="chart-wrap" style="display:flex;align-items:center;justify-content:center;">
+        <canvas id="chart-models" style="max-width:260px;max-height:260px;"></canvas>
+      </div>
+      <div id="chart-models-legend" class="chart-legend"></div>
+    </div>
+  </div>
+
+  <!-- ── Charts Row 2: Top Users + Daily Predictions ── -->
+  <div class="admin-charts-row">
+    <div class="admin-chart-card glass">
+      <div class="chart-header">
+        <h3>Top 10 Users <span class="chart-sub">(by predictions)</span></h3>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-topusers"></canvas>
+      </div>
+    </div>
+    <div class="admin-chart-card glass">
+      <div class="chart-header">
+        <h3>Daily Predictions <span class="chart-sub">(last 30 days)</span></h3>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-preds-daily"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Recent Logins ── -->
+  <div class="admin-table-wrap glass" style="margin:0 32px 28px;">
+    <div class="admin-table-header">
+      <h3>Recent Logins</h3>
+      <button class="btn-refresh" onclick="loadAdminData()">Refresh All</button>
+    </div>
+    <div class="admin-table-container">
+      <table class="admin-table">
+        <thead><tr><th>#</th><th>Email</th><th>Login Time</th><th>IP Address</th></tr></thead>
+        <tbody id="logins-table-body">
+          <tr><td colspan="4" class="table-loading">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+    <!-- ── User Management Table ── -->
+    <div class="admin-table-wrap glass" style="margin:0 32px 28px;">
+        <div class="admin-table-header">
+            <h3>Registered Users</h3>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <input type="text" id="user-search" placeholder="Search by email…" class="admin-search" oninput="filterUsers(this.value)" />
+                <button class="btn-refresh" onclick="loadAdminData()">Refresh</button>
+            </div>
+        </div>
+        <div id="admin-table-error" class="auth-alert error hidden"></div>
+        <div class="admin-table-container">
+            <table class="admin-table" id="admin-users-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Verified</th>
+                        <th>Joined</th>
+                        <th>Last Login</th>
+                        <th>Predictions</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body">
+                    <tr><td colspan="7" class="table-loading">Loading users…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── User Reports Table ── -->
+    <div class="admin-table-wrap glass" style="margin:0 32px 48px;">
+        <div class="admin-table-header">
+            <h3>User Reports &amp; Issues</h3>
+            <button class="btn-refresh" onclick="loadAdminData()">Refresh</button>
+        </div>
+        <div class="admin-table-container">
+            <table class="admin-table" id="admin-reports-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Email</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="reports-table-body">
+                    <tr><td colspan="5" class="table-loading">Loading reports…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

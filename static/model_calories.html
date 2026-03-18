@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitnessAGNT – Daily Calorie Estimator</title>
+    <meta name="description" content="Estimate your optimal daily calorie intake with FitnessAGNT AI predictions." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="predict-page">
+
+    <div class="bg-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Top Nav -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <a href="dashboard.html" class="back-link">← Dashboard</a>
+            <span class="nav-sep">|</span>
+            <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" stroke="url(#cn1)" stroke-width="2.5" />
+                <path d="M14 24h4l3-8 4 16 3-10 2 2h4" stroke="url(#cn2)" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <defs>
+                    <linearGradient id="cn1" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                    <linearGradient id="cn2" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            FitnessAGNT
+        </div>
+        <div class="nav-user">
+            <div class="user-badge" id="user-badge"><span class="dot"></span><span
+                    id="username-display">Loading...</span></div>
+            <button class="btn-logout" id="btn-logout" onclick="logout()">Sign Out</button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="page-hero">
+        <h2>Daily Calorie Estimator</h2>
+        <p>Input your body stats and weight goal — our Random Forest model calculates your precise calorie target,
+            factoring in BMR, TDEE, and exercise burn rate.</p>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="predict-layout">
+
+        <!-- Left: Input Form -->
+        <div class="form-card glass">
+            <h3>Body &amp; Goal Metrics</h3>
+            <form id="calorie-form" onsubmit="handleCaloriePredict(event)" novalidate>
+
+                <!-- Row 1: Personal -->
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="c-age">Age</label>
+                        <input type="number" id="c-age" class="predict-input" placeholder="e.g. 25" min="12" max="100"
+                            required />
+                    </div>
+                    <div class="form-field">
+                        <label>Gender</label>
+                        <div class="gender-toggle">
+                            <button type="button" id="cg-male" class="gender-btn active"
+                                onclick="setCGender('Male')">Male</button>
+                            <button type="button" id="cg-female" class="gender-btn"
+                                onclick="setCGender('Female')">Female</button>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="c-height">Height (cm)</label>
+                        <input type="number" id="c-height" class="predict-input" placeholder="e.g. 175" min="120"
+                            max="220" required />
+                    </div>
+                    <div class="form-field">
+                        <label for="c-weight">Current Weight (kg)</label>
+                        <input type="number" id="c-weight" class="predict-input" placeholder="e.g. 70" min="30"
+                            max="200" required />
+                    </div>
+                </div>
+
+                <!-- Row 2: Goal -->
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="c-target">Target Weight (kg)</label>
+                        <input type="number" id="c-target" class="predict-input" placeholder="e.g. 65" min="30"
+                            max="200" required />
+                    </div>
+                    <div class="form-field">
+                        <label for="c-weeks">Duration (weeks)</label>
+                        <input type="number" id="c-weeks" class="predict-input" placeholder="e.g. 12" min="1" max="104"
+                            required />
+                    </div>
+                    <div class="form-field">
+                        <label for="c-exdur">Exercise Duration (min)</label>
+                        <input type="number" id="c-exdur" class="predict-input" placeholder="e.g. 45" min="5" max="300"
+                            required />
+                    </div>
+                </div>
+
+                <!-- Activity Level -->
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label>Activity Level</label>
+                    <div class="option-grid" id="activity-grid">
+                        <button type="button" class="option-btn active" data-val="Sedentary"
+                            onclick="setOption(this,'activity-grid','cActivityLevel')">Sedentary</button>
+                        <button type="button" class="option-btn" data-val="Lightly Active"
+                            onclick="setOption(this,'activity-grid','cActivityLevel')">Lightly Active</button>
+                        <button type="button" class="option-btn" data-val="Moderately Active"
+                            onclick="setOption(this,'activity-grid','cActivityLevel')">Moderately Active</button>
+                        <button type="button" class="option-btn" data-val="Very Active"
+                            onclick="setOption(this,'activity-grid','cActivityLevel')">Very Active</button>
+                    </div>
+                </div>
+
+                <!-- Exercise Type -->
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label>Exercise Type</label>
+                    <div class="option-grid" id="extype-grid">
+                        <button type="button" class="option-btn active" data-val="Light Training"
+                            onclick="setOption(this,'extype-grid','cExerciseType')">Light Training</button>
+                        <button type="button" class="option-btn" data-val="Cardio"
+                            onclick="setOption(this,'extype-grid','cExerciseType')">Cardio</button>
+                        <button type="button" class="option-btn" data-val="Strength Training"
+                            onclick="setOption(this,'extype-grid','cExerciseType')">Strength Training</button>
+                        <button type="button" class="option-btn" data-val="Weight Training"
+                            onclick="setOption(this,'extype-grid','cExerciseType')">Weight Training</button>
+                    </div>
+                </div>
+
+                <div id="calorie-error" class="auth-alert error hidden" role="alert"></div>
+
+                <button type="submit" id="btn-calorie-predict" class="btn-predict">
+                    <span id="calorie-btn-text">Estimate Calories</span>
+                    <span class="btn-loader hidden" id="calorie-loader"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-col">
+
+            <!-- Result Card -->
+            <div class="result-card glass hidden-result" id="calorie-result-card">
+                <p class="result-label">Daily Calorie Target</p>
+                <div class="calorie-big" id="calorie-big-num">--</div>
+                <div class="calorie-unit">kcal / day</div>
+                <div class="goal-badge" id="goal-badge"></div>
+                <div class="calorie-breakdown" id="calorie-breakdown"></div>
+                <div class="result-interpretation" id="calorie-interp">Fill in your details above.</div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="tips-card glass">
+                <h4>Calorie Tips</h4>
+                <div class="tip-item"><span>Eat at a 300–500 kcal deficit for steady weight loss.</span></div>
+                <div class="tip-item"><span>Prioritize protein — it keeps you full and preserves muscle.</span></div>
+                <div class="tip-item"><span>Track your food for at least 2 weeks for accurate adjustments.</span></div>
+                <div class="tip-item"><span>Stay hydrated — thirst is often mistaken for hunger.</span></div>
+                <div class="tip-item"><span>Re-calculate calories every 4 weeks as your weight changes.</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/model_calories.js"></script>
+</body>
+
+</html>

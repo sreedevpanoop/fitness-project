@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitnessAGNT – AI-Powered Fitness Prediction Suite</title>
+  <meta name="description"
+    content="FitnessAGNT uses AI to predict muscle recovery, daily calorie needs, and macro targets. Log in or continue as guest." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="auth-page">
+
+  <!-- Animated background particles -->
+  <div class="bg-particles" aria-hidden="true">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- Main Auth Container -->
+  <div class="auth-wrapper">
+
+    <!-- Left Panel – Branding -->
+    <div class="auth-brand">
+      <div class="brand-logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="22" stroke="url(#g1)" stroke-width="2.5" />
+          <path d="M14 24h4l3-8 4 16 3-10 2 2h4" stroke="url(#g2)" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <defs>
+            <linearGradient id="g1" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00e5ff" />
+              <stop offset="1" stop-color="#a855f7" />
+            </linearGradient>
+            <linearGradient id="g2" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00e5ff" />
+              <stop offset="1" stop-color="#a855f7" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1 class="brand-title">FitnessAGNT</h1>
+      <p class="brand-subtitle">Your AI Fitness Intelligence Agent</p>
+
+      <div class="brand-about">
+        <p class="about-text">
+          FitnessAGNT is a suite of machine learning models trained on thousands of real fitness records —
+          giving you data-driven insights into your recovery, nutrition, and physique goals.
+        </p>
+        <p class="about-text">
+          Enter your body metrics, workout details, and lifestyle data to unlock personalized predictions
+          built for your body — not a generic average.
+        </p>
+        <ul class="about-list">
+          <li>Muscle Recovery — Gradient Boosting Regressor</li>
+          <li>Daily Calories — Random Forest model with BMR &amp; TDEE</li>
+          <li>Macro &amp; Meal Plan — Multi-output Neural predictor</li>
+          <li>5 muscle groups · 10+ input factors · real-time results</li>
+        </ul>
+      </div>
+
+      <div class="brand-stat-row">
+        <div class="brand-stat">
+          <span class="stat-num">5000+</span>
+          <span class="stat-label">Training Records</span>
+        </div>
+        <div class="brand-stat">
+          <span class="stat-num">3</span>
+          <span class="stat-label">AI Models</span>
+        </div>
+        <div class="brand-stat">
+          <span class="stat-num">5</span>
+          <span class="stat-label">Muscle Groups</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel – Auth Forms -->
+    <div class="auth-card glass">
+
+      <!-- Tab Switchers -->
+      <div class="auth-tabs" role="tablist" id="auth-tabs">
+        <button id="tab-login" class="auth-tab active" role="tab" aria-selected="true"
+          onclick="showTab('login')">Sign In</button>
+        <button id="tab-register" class="auth-tab" role="tab" aria-selected="false"
+          onclick="showTab('register')">Register</button>
+      </div>
+
+      <!-- Alert Box -->
+      <div id="auth-alert" class="auth-alert hidden" role="alert"></div>
+
+      <!-- ═══════════ LOGIN FORM ═══════════ -->
+      <form id="form-login" class="auth-form" onsubmit="handleLogin(event)" novalidate>
+        <div class="field-group">
+          <label for="login-email">Email Address</label>
+          <div class="input-wrap">
+            <input type="email" id="login-email" placeholder="Enter your email" autocomplete="email" required />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="login-pass">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password"
+              required />
+            <button type="button" class="toggle-pw" onclick="togglePw('login-pass', this)"
+              aria-label="Toggle password">Show</button>
+          </div>
+        </div>
+        <!-- Forgot password link -->
+        <div style="text-align:right;margin-top:-8px;margin-bottom:16px;">
+          <button type="button" class="forgot-link" onclick="showForgot()">Forgot password?</button>
+        </div>
+        <button type="submit" id="btn-login" class="btn-primary">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-loader hidden"></span>
+        </button>
+      </form>
+
+      <!-- ═══════════ REGISTER FORM ═══════════ -->
+      <form id="form-register" class="auth-form hidden" onsubmit="handleRegister(event)" novalidate>
+        <div class="field-group">
+          <label for="reg-email">Email Address</label>
+          <div class="input-wrap">
+            <input type="email" id="reg-email" placeholder="Enter your email address" autocomplete="email"
+              required />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="reg-pass">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="reg-pass" placeholder="Min. 6 characters" autocomplete="new-password" required
+              minlength="6" />
+            <button type="button" class="toggle-pw" onclick="togglePw('reg-pass', this)"
+              aria-label="Toggle password">Show</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="reg-confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <input type="password" id="reg-confirm" placeholder="Repeat password" autocomplete="new-password"
+              required />
+          </div>
+        </div>
+
+        <!-- Optional profile fields -->
+        <p style="font-size:12px;color:var(--text-3);margin:12px 0 16px;text-align:center;">Optional — pre-fills your prediction forms</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field-group" style="margin-bottom:0;">
+            <label for="reg-age">Age</label>
+            <div class="input-wrap">
+              <input type="number" id="reg-age" placeholder="e.g. 25" min="12" max="100" />
+            </div>
+          </div>
+          <div class="field-group" style="margin-bottom:0;">
+            <label>Gender</label>
+            <div class="gender-toggle">
+              <button type="button" id="reg-g-male" class="gender-btn active" onclick="setRegGender('Male')">Male</button>
+              <button type="button" id="reg-g-female" class="gender-btn" onclick="setRegGender('Female')">Female</button>
+            </div>
+          </div>
+          <div class="field-group" style="margin-bottom:0;">
+            <label for="reg-height">Height (cm)</label>
+            <div class="input-wrap">
+              <input type="number" id="reg-height" placeholder="e.g. 175" min="120" max="220" />
+            </div>
+          </div>
+          <div class="field-group" style="margin-bottom:0;">
+            <label for="reg-weight">Weight (kg)</label>
+            <div class="input-wrap">
+              <input type="number" id="reg-weight" placeholder="e.g. 70" min="30" max="200" />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-register" class="btn-primary" style="margin-top:20px;">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-loader hidden"></span>
+        </button>
+      </form>
+
+      <!-- ═══════════ EMAIL VERIFICATION PANEL ═══════════ -->
+      <div id="panel-verify" class="auth-form hidden">
+        <div class="verify-header">
+          <div class="verify-icon">✉️</div>
+          <h3 class="verify-title">Check Your Inbox</h3>
+          <p class="verify-subtitle">We sent a <strong>6-digit code</strong> to<br />
+            <span id="verify-email-display" class="verify-email"></span>
+          </p>
+        </div>
+        <div class="field-group" style="margin-top:20px;">
+          <label for="verify-code">Verification Code</label>
+          <div class="input-wrap">
+            <input type="text" id="verify-code" placeholder="Enter 6-digit code" maxlength="6"
+              inputmode="numeric" pattern="\d{6}" autocomplete="one-time-code" />
+          </div>
+        </div>
+        <button type="button" id="btn-verify" class="btn-primary" onclick="handleVerifyCode()">
+          <span class="btn-text">Verify &amp; Continue</span>
+          <span class="btn-loader hidden"></span>
+        </button>
+        <button type="button" class="btn-ghost" onclick="handleResendCode()" style="margin-top:10px;width:100%;">
+          Resend Code
+        </button>
+        <button type="button" class="btn-ghost" onclick="showTab('register')" style="margin-top:6px;width:100%;opacity:0.6;font-size:13px;">
+          ← Back to Register
+        </button>
+      </div>
+
+      <!-- ═══════════ FORGOT PASSWORD PANEL ═══════════ -->
+      <div id="panel-forgot" class="auth-form hidden">
+        <div class="verify-header">
+          <div class="verify-icon">🔑</div>
+          <h3 class="verify-title">Reset Password</h3>
+          <p class="verify-subtitle">Enter your email and we'll send you a secure reset link.</p>
+        </div>
+        <div class="field-group" style="margin-top:20px;">
+          <label for="forgot-email">Email Address</label>
+          <div class="input-wrap">
+            <input type="email" id="forgot-email" placeholder="Enter your email" autocomplete="email" />
+          </div>
+        </div>
+        <button type="button" id="btn-forgot" class="btn-primary" onclick="handleForgotPassword()">
+          <span class="btn-text">Send Reset Link</span>
+          <span class="btn-loader hidden"></span>
+        </button>
+        <button type="button" class="btn-ghost" onclick="showTab('login')" style="margin-top:10px;width:100%;">
+          ← Back to Sign In
+        </button>
+      </div>
+
+      <!-- Divider (hidden when verify/forgot panels are shown) -->
+      <div class="auth-divider" id="auth-divider"><span>or</span></div>
+
+      <!-- Guest Button -->
+      <button id="btn-guest" class="btn-guest" onclick="continueAsGuest()">
+        Continue as Guest
+      </button>
+
+      <p class="auth-footnote">Guest mode — no data saved between sessions</p>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitnessAGNT – Dashboard</title>
+    <meta name="description" content="FitnessAGNT fitness AI suite — choose your prediction tool." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="dashboard-page">
+
+    <!-- Animated background -->
+    <div class="bg-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Top Nav -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" stroke="url(#dn1)" stroke-width="2.5" />
+                <path d="M14 24h4l3-8 4 16 3-10 2 2h4" stroke="url(#dn2)" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <defs>
+                    <linearGradient id="dn1" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                    <linearGradient id="dn2" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            FitnessAGNT
+        </div>
+        <div class="nav-user" style="position:relative;">
+            <div class="user-badge" id="user-badge" onclick="toggleUserMenu()">
+                <div class="user-avatar-icon" id="user-avatar-initial">?</div>
+                <span id="username-display">Loading...</span>
+            </div>
+
+            <!-- Profile & Settings Dropdown -->
+            <div class="user-menu-dropdown" id="user-menu">
+                <div class="user-menu-header">
+                    <h4 style="margin:0; font-size:1.1rem;">Settings &amp; Profile</h4>
+                    <p style="margin:4px 0 0; font-size:0.8rem; color:var(--text-3);">Manage your account and app preferences.</p>
+                </div>
+                
+                <div class="user-menu-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div class="form-field">
+                            <label for="p-age">Age</label>
+                            <input type="number" id="p-age" class="predict-input" placeholder="25" min="12" max="100" />
+                        </div>
+                        <div class="form-field">
+                            <label>Gender</label>
+                            <div class="gender-toggle">
+                                <button type="button" id="p-g-male" class="gender-btn active" onclick="setProfileGender('Male')">M</button>
+                                <button type="button" id="p-g-female" class="gender-btn" onclick="setProfileGender('Female')">F</button>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="p-height">Height (cm)</label>
+                            <input type="number" id="p-height" class="predict-input" placeholder="175" min="120" max="220" />
+                        </div>
+                        <div class="form-field">
+                            <label for="p-weight">Weight (kg)</label>
+                            <input type="number" id="p-weight" class="predict-input" placeholder="70" min="30" max="200" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-menu-footer">
+                    <button class="btn-predict" id="btn-save-profile" onclick="saveProfile()" style="padding:8px 12px; font-size:0.85rem; flex:2;">
+                        <span id="save-profile-text">Save</span>
+                        <span class="btn-loader hidden" id="save-profile-loader" style="width:14px;height:14px;border-width:2px;"></span>
+                    </button>
+                    <span id="profile-status" style="font-size:12px; display:flex; align-items:center;"></span>
+                </div>
+
+                <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+                    <button type="button" onclick="openHelpModal()" style="background:none; border:none; color:var(--text-2); font-size:0.85rem; text-align:left; display:flex; align-items:center; gap:8px; cursor:pointer; padding:4px 0;">
+                        <span>❓</span> Help &amp; FAQ
+                    </button>
+                    <button type="button" onclick="openReportModal()" style="background:none; border:none; color:var(--text-2); font-size:0.85rem; text-align:left; display:flex; align-items:center; gap:8px; cursor:pointer; padding:4px 0;">
+                        <span>💬</span> Report an Issue
+                    </button>
+                </div>
+
+                <div class="user-menu-footer" style="padding-top:12px;">
+                    <button class="btn-logout" id="btn-logout" onclick="logout()">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="dash-hero">
+        <h1>Your AI Fitness Agent</h1>
+        <p id="dash-greeting">Select a model below to get your personalized AI-powered prediction</p>
+    </div>
+
+    <!-- Model Cards Grid -->
+    <div class="dash-grid">
+
+        <!-- Card 1: Muscle Recovery -->
+        <a href="predict.html" class="dash-card glass" id="card-recovery">
+            <div class="dash-card-icon recovery-icon">
+                <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="url(#ci1)" stroke-width="2" />
+                    <path d="M14 24h4l3-8 4 16 3-10 2 2h4" stroke="url(#ci1)" stroke-width="2.5"
+                        stroke-linecap="round" />
+                    <defs>
+                        <linearGradient id="ci1" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#00e5ff" />
+                            <stop offset="1" stop-color="#a855f7" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="dash-card-body">
+                <h3>Muscle Recovery</h3>
+                <p>Know exactly when your muscles are ready again. Our Gradient Boosting model analyses your workout
+                    intensity, sleep, protein intake, and body metrics to predict optimal recovery time.</p>
+                <div class="dash-card-tags">
+                    <span class="tag">Recovery Time</span>
+                    <span class="tag">BMI</span>
+                    <span class="tag">5 Muscle Groups</span>
+                </div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+        </a>
+
+        <!-- Card 2: Calorie Predictor -->
+        <a href="model_calories.html" class="dash-card glass" id="card-calories">
+            <div class="dash-card-icon calorie-icon">
+                <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="url(#ci2)" stroke-width="2" />
+                    <path d="M24 12v4M24 32v4M12 24h4M32 24h4" stroke="url(#ci2)" stroke-width="2.5"
+                        stroke-linecap="round" />
+                    <circle cx="24" cy="24" r="7" stroke="url(#ci2)" stroke-width="2" />
+                    <defs>
+                        <linearGradient id="ci2" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#f97316" />
+                            <stop offset="1" stop-color="#eab308" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="dash-card-body">
+                <h3>Daily Calorie Needs</h3>
+                <p>Stop guessing your calorie target. Our Random Forest model calculates your personalised BMR, TDEE,
+                    and daily calorie goal based on your body, lifestyle, and weight objectives.</p>
+                <div class="dash-card-tags">
+                    <span class="tag">BMR &amp; TDEE</span>
+                    <span class="tag">Weight Goals</span>
+                    <span class="tag">Activity Level</span>
+                </div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+        </a>
+
+        <!-- Card 3: Macro Predictor -->
+        <a href="model_macro.html" class="dash-card glass" id="card-macro">
+            <div class="dash-card-icon macro-icon">
+                <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="url(#ci3)" stroke-width="2" />
+                    <path d="M16 32l4-12 4 8 3-5 3 9" stroke="url(#ci3)" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <defs>
+                        <linearGradient id="ci3" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#10b981" />
+                            <stop offset="1" stop-color="#06b6d4" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="dash-card-body">
+                <h3>Macro &amp; Meal Plan</h3>
+                <p>Get your exact daily macros — protein, carbs, fats, and fiber — plus a tailored meal plan aligned
+                    to your physique goal, whether you're cutting, maintaining, or bulking.</p>
+                <div class="dash-card-tags">
+                    <span class="tag">Macros</span>
+                    <span class="tag">Meal Plan</span>
+                    <span class="tag">Physique Goal</span>
+                </div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+        </a>
+
+        <!-- Card 4: Progression History -->
+        <a href="progress.html" class="dash-card glass" id="card-progress">
+            <div class="dash-card-icon" style="background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.3);">
+                <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="url(#ci4)" stroke-width="2" />
+                    <path d="M14 28l6-6 6 4 10-10" stroke="url(#ci4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="36" cy="16" r="2" fill="url(#ci4)" />
+                    <defs>
+                        <linearGradient id="ci4" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#ec4899" />
+                            <stop offset="1" stop-color="#8b5cf6" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="dash-card-body">
+                <h3>Progression History</h3>
+                <p>Track your fitness journey over time. View detailed date-by-date charts mapping your recovery time, daily calorie needs, and macro splits.</p>
+                <div class="dash-card-tags">
+                    <span class="tag">Charts &amp; Data</span>
+                    <span class="tag">Trends</span>
+                </div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+        </a>
+
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModals()">
+        <div class="modal-content glass">
+            <h3 style="margin-bottom:12px;">Help &amp; FAQ</h3>
+            <div style="font-size:0.9rem; color:var(--text-2); line-height:1.6; max-height:60vh; overflow-y:auto; padding-right:8px;">
+                <p><strong>1. How does the Muscle Recovery model work?</strong><br>
+                It uses your workout duration, intensity, age, height, weight, daily protein, and sleep to calculate a precise recovery time using an advanced machine learning algorithm.</p>
+                <div style="height:12px;"></div>
+                <p><strong>2. How are Calories and Macros predicted?</strong><br>
+                Fill out your body metrics and fitness goals. The AI calculates your BMR and TDEE, then splits it into optimal macros (Protein, Carbs, Fats) depending on if you want to lose, gain, or maintain weight.</p>
+                <div style="height:12px;"></div>
+                <p><strong>3. Why should I fill out my Profile?</strong><br>
+                Your Age, Gender, Height, and Weight in the settings menu will automatically pre-fill all prediction forms to save you time.</p>
+            </div>
+            <button class="btn-predict" onclick="closeModals()" style="margin-top:20px; padding:10px;">Got it</button>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeModals()">
+        <div class="modal-content glass">
+            <h3 style="margin-bottom:8px;">Report an Issue</h3>
+            <p style="font-size:0.85rem; color:var(--text-3); margin-bottom:16px;">Notice a false prediction, wrong calculation, or website bug? Let us know so the admin can fix it.</p>
+            <form id="report-form" onsubmit="submitReport(event)">
+                <div class="form-field" style="margin-bottom:12px;">
+                    <label for="r-type">Issue Type</label>
+                    <select id="r-type" class="predict-input" required style="background:rgba(15,23,42,0.8);">
+                        <option value="False Prediction">False Prediction / Bad Math</option>
+                        <option value="UI Bug">Website Bug / Glitch</option>
+                        <option value="Feature Request">Feature Request</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="r-desc">Description</label>
+                    <textarea id="r-desc" class="predict-input" required placeholder="Please describe what went wrong..." rows="4" style="resize:vertical;"></textarea>
+                </div>
+                <div id="report-err" style="color:var(--danger); font-size:0.85rem; margin-top:8px;" class="hidden"></div>
+                <div id="report-succ" style="color:var(--success); font-size:0.85rem; margin-top:8px;" class="hidden">Report submitted successfully!</div>
+                
+                <div style="display:flex; gap:12px; margin-top:20px;">
+                    <button type="button" class="btn-logout" onclick="closeModals()" style="flex:1;">Cancel</button>
+                    <button type="submit" class="btn-predict" id="btn-submit-report" style="flex:2; padding:10px;">
+                        <span id="report-btn-text">Send Report</span>
+                        <span class="btn-loader hidden" id="report-loader" style="width:16px;height:16px;border-width:2px;"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

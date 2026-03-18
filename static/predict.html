@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitnessAGNT – Muscle Recovery Predictor</title>
+    <meta name="description"
+        content="Enter your workout details to get an AI-powered muscle recovery time prediction from FitnessAGNT." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="predict-page">
+
+    <!-- BG particles -->
+    <div class="bg-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <a href="dashboard.html" class="back-link">← Dashboard</a>
+            <span class="nav-sep">|</span>
+            <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" stroke="url(#ng1)" stroke-width="2.5" />
+                <path d="M14 24h4l3-8 4 16 3-10 2 2h4" stroke="url(#ng2)" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <defs>
+                    <linearGradient id="ng1" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                    <linearGradient id="ng2" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            FitnessAGNT
+        </div>
+        <div class="nav-user">
+            <div class="user-badge" id="user-badge">
+                <span class="dot"></span>
+                <span id="username-display">Loading...</span>
+            </div>
+            <button class="btn-logout" id="btn-logout" onclick="logout()">Sign Out</button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="page-hero">
+        <h2>Muscle Recovery Predictor</h2>
+        <p>Tell our Gradient Boosting model about your workout and body — get a precise recovery window so you know
+            exactly when to train again.</p>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="predict-layout">
+
+        <!-- Left: Input Form -->
+        <div class="form-card glass">
+            <h3>Workout &amp; Body Metrics</h3>
+
+            <form id="predict-form" onsubmit="handlePredict(event)" novalidate>
+
+                <!-- Row 1: Personal -->
+                <div class="form-grid">
+
+                    <!-- Age -->
+                    <div class="form-field">
+                        <label for="f-age">Age</label>
+                        <input type="number" id="f-age" class="predict-input" placeholder="e.g. 25" min="12" max="100"
+                            required />
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-field">
+                        <label>Gender</label>
+                        <div class="gender-toggle">
+                            <button type="button" id="g-male" class="gender-btn active"
+                                onclick="setGender('Male')">Male</button>
+                            <button type="button" id="g-female" class="gender-btn"
+                                onclick="setGender('Female')">Female</button>
+                        </div>
+                    </div>
+
+                    <!-- Height -->
+                    <div class="form-field">
+                        <label for="f-height">Height (cm)</label>
+                        <input type="number" id="f-height" class="predict-input" placeholder="e.g. 175" min="120"
+                            max="220" required oninput="updateBMI()" />
+                    </div>
+
+                    <!-- Weight -->
+                    <div class="form-field">
+                        <label for="f-weight">Weight (kg)</label>
+                        <input type="number" id="f-weight" class="predict-input" placeholder="e.g. 70" min="30"
+                            max="200" required oninput="updateBMI()" />
+                    </div>
+
+                </div>
+
+                <!-- BMI Live Indicator -->
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label>BMI (Auto-calculated)</label>
+                    <div id="bmi-pill" class="bmi-display">
+                        <span>BMI:</span>
+                        <span class="bmi-val" id="bmi-value">--</span>
+                        <span id="bmi-category" style="font-size:0.8rem; color:var(--text-3)"></span>
+                    </div>
+                </div>
+
+                <!-- Workout Part -->
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label>Workout Part / Muscle Group</label>
+                    <div class="workout-grid">
+                        <button type="button" class="workout-btn active" data-part="Chest"
+                            onclick="setWorkout(this)">Chest</button>
+                        <button type="button" class="workout-btn" data-part="Back"
+                            onclick="setWorkout(this)">Back</button>
+                        <button type="button" class="workout-btn" data-part="Legs"
+                            onclick="setWorkout(this)">Legs</button>
+                        <button type="button" class="workout-btn" data-part="Arms"
+                            onclick="setWorkout(this)">Arms</button>
+                        <button type="button" class="workout-btn" data-part="Shoulders"
+                            onclick="setWorkout(this)">Shoulders</button>
+                    </div>
+                </div>
+
+                <!-- Row 2: Workout Details -->
+                <div class="form-grid">
+
+                    <!-- Duration -->
+                    <div class="form-field full">
+                        <label for="f-duration">Workout Duration: <span class="range-val" id="dur-val">45</span>
+                            min</label>
+                        <div class="range-wrap">
+                            <input type="range" id="f-duration" class="predict-range" min="10" max="180" value="45"
+                                oninput="document.getElementById('dur-val').textContent=this.value; updateRangeStyle(this,10,180)" />
+                        </div>
+                        <span class="field-hint">10 to 180 minutes</span>
+                    </div>
+
+                    <!-- Intensity -->
+                    <div class="form-field full">
+                        <label for="f-intensity">Workout Intensity: <span class="range-val" id="int-val">5</span> /
+                            10</label>
+                        <div class="range-wrap">
+                            <input type="range" id="f-intensity" class="predict-range" min="1" max="10" value="5"
+                                oninput="document.getElementById('int-val').textContent=this.value; updateRangeStyle(this,1,10)" />
+                        </div>
+                        <span class="field-hint">1 = very light, 10 = maximum effort</span>
+                    </div>
+
+                    <!-- Protein -->
+                    <div class="form-field">
+                        <label for="f-protein">Protein Intake (g/day)</label>
+                        <input type="number" id="f-protein" class="predict-input" placeholder="e.g. 150" min="10"
+                            max="500" required />
+                    </div>
+
+                    <!-- Sleep -->
+                    <div class="form-field">
+                        <label for="f-sleep">Sleep (hours/night)</label>
+                        <input type="number" id="f-sleep" class="predict-input" placeholder="e.g. 7.5" min="3" max="12"
+                            step="0.5" required />
+                    </div>
+
+                </div>
+
+                <!-- Error msg -->
+                <div id="predict-error" class="auth-alert error hidden" role="alert"></div>
+
+                <!-- Submit -->
+                <button type="submit" id="btn-predict" class="btn-predict">
+                    <span id="predict-btn-text">Predict Recovery Time</span>
+                    <span class="btn-loader hidden" id="predict-loader"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-col">
+
+            <!-- Result Card -->
+            <div class="result-card glass hidden-result" id="result-card">
+                <p class="result-label">Estimated Muscle Recovery</p>
+
+                <div class="ring-container">
+                    <svg class="ring-svg" width="180" height="180" viewBox="0 0 180 180">
+                        <defs>
+                            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00e5ff" />
+                                <stop offset="100%" stop-color="#a855f7" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="ring-bg" cx="90" cy="90" r="80" />
+                        <circle class="ring-fill" id="ring-fill" cx="90" cy="90" r="80" />
+                    </svg>
+                    <div class="ring-text">
+                        <span class="ring-hours" id="ring-hours">--</span>
+                        <span class="ring-unit">hours</span>
+                    </div>
+                </div>
+
+                <div class="result-interpretation" id="result-interp">
+                    Fill in your details and click Predict.
+                </div>
+                <div class="result-bmi" id="result-bmi-info"></div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="tips-card glass">
+                <h4>Recovery Tips</h4>
+                <div class="tip-item"><span>Stay hydrated — aim for 3L water daily after intense sessions.</span></div>
+                <div class="tip-item"><span>Consume 20–40g protein within 30 min post-workout.</span></div>
+                <div class="tip-item"><span>7–9 hours of sleep accelerates muscle repair significantly.</span></div>
+                <div class="tip-item"><span>Cold showers or ice baths reduce DOMS within 1–2 hours.</span></div>
+                <div class="tip-item"><span>Active recovery (stretching, light walking) beats complete rest.</span>
+                </div>
+            </div>
+
+            <!-- History Card -->
+            <div class="history-card glass">
+                <h4>Prediction History</h4>
+                <div class="history-list" id="history-list">
+                    <div class="history-empty">No predictions yet — make your first one.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/predict.js"></script>
+</body>
+
+</html>

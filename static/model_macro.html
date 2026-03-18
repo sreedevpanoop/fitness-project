@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitnessAGNT – Macro &amp; Meal Plan Predictor</title>
+    <meta name="description" content="Get personalized daily macro targets and meal plan recommendations from FitnessAGNT." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="predict-page">
+
+    <div class="bg-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Top Nav -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <a href="dashboard.html" class="back-link">← Dashboard</a>
+            <span class="nav-sep">|</span>
+            <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" stroke="url(#mn1)" stroke-width="2.5" />
+                <path d="M14 24h4l3-8 4 16 3-10 2 2h4" stroke="url(#mn2)" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <defs>
+                    <linearGradient id="mn1" x1="2" y1="2" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                    <linearGradient id="mn2" x1="14" y1="16" x2="34" y2="32" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#00e5ff" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            FitnessAGNT
+        </div>
+        <div class="nav-user">
+            <div class="user-badge" id="user-badge"><span class="dot"></span><span
+                    id="username-display">Loading...</span></div>
+            <button class="btn-logout" id="btn-logout" onclick="logout()">Sign Out</button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="page-hero">
+        <h2>Macro &amp; Meal Plan Predictor</h2>
+        <p>Get your AI-generated daily macro targets — Calories, Protein, Carbs, Fats &amp; Fiber — plus a curated
+            meal plan matched precisely to your physique goal and training style.</p>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="predict-layout">
+
+        <!-- Left: Input Form -->
+        <div class="form-card glass">
+            <h3>Personal &amp; Fitness Profile</h3>
+            <form id="macro-form" onsubmit="handleMacroPredict(event)" novalidate>
+
+                <!-- Row 1 -->
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="m-age">Age</label>
+                        <input type="number" id="m-age" class="predict-input" placeholder="e.g. 28" min="12" max="100"
+                            required />
+                    </div>
+                    <div class="form-field">
+                        <label>Gender</label>
+                        <div class="gender-toggle">
+                            <button type="button" id="mg-male" class="gender-btn active"
+                                onclick="setMGender('Male')">Male</button>
+                            <button type="button" id="mg-female" class="gender-btn"
+                                onclick="setMGender('Female')">Female</button>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="m-height">Height (cm)</label>
+                        <input type="number" id="m-height" class="predict-input" placeholder="e.g. 175" min="120"
+                            max="220" required />
+                    </div>
+                    <div class="form-field">
+                        <label for="m-weight">Weight (kg)</label>
+                        <input type="number" id="m-weight" class="predict-input" placeholder="e.g. 75" min="30"
+                            max="200" required />
+                    </div>
+                </div>
+
+                <!-- Activity Level -->
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label>Activity Level</label>
+                    <div class="option-grid" id="m-activity-grid">
+                        <button type="button" class="option-btn active" data-val="Sedentary"
+                            onclick="setOption(this,'m-activity-grid','mActivityLevel')">Sedentary</button>
+                        <button type="button" class="option-btn" data-val="Lightly Active"
+                            onclick="setOption(this,'m-activity-grid','mActivityLevel')">Lightly Active</button>
+                        <button type="button" class="option-btn" data-val="Moderately Active"
+                            onclick="setOption(this,'m-activity-grid','mActivityLevel')">Moderately Active</button>
+                        <button type="button" class="option-btn" data-val="Very Active"
+                            onclick="setOption(this,'m-activity-grid','mActivityLevel')">Very Active</button>
+                    </div>
+                </div>
+
+                <!-- Exercise Type -->
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label>Exercise Type</label>
+                    <div class="option-grid" id="m-exercise-grid">
+                        <button type="button" class="option-btn active" data-val="Cardio"
+                            onclick="setOption(this,'m-exercise-grid','mExerciseType')">Cardio</button>
+                        <button type="button" class="option-btn" data-val="Strength Training"
+                            onclick="setOption(this,'m-exercise-grid','mExerciseType')">Strength Training</button>
+                        <button type="button" class="option-btn" data-val="Weight Training"
+                            onclick="setOption(this,'m-exercise-grid','mExerciseType')">Weight Training</button>
+                        <button type="button" class="option-btn" data-val="HIIT"
+                            onclick="setOption(this,'m-exercise-grid','mExerciseType')">HIIT</button>
+                        <button type="button" class="option-btn" data-val="Mixed"
+                            onclick="setOption(this,'m-exercise-grid','mExerciseType')">Mixed</button>
+                    </div>
+                </div>
+
+                <!-- Physique Goal -->
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label>Physique Goal</label>
+                    <div class="option-grid" id="m-goal-grid">
+                        <button type="button" class="option-btn active" data-val="Lean"
+                            onclick="setOption(this,'m-goal-grid','mPhysiqueGoal')">Lean</button>
+                        <button type="button" class="option-btn" data-val="Shredded"
+                            onclick="setOption(this,'m-goal-grid','mPhysiqueGoal')">Shredded</button>
+                        <button type="button" class="option-btn" data-val="Bulk"
+                            onclick="setOption(this,'m-goal-grid','mPhysiqueGoal')">Bulk</button>
+                    </div>
+                </div>
+
+                <div id="macro-error" class="auth-alert error hidden" role="alert"></div>
+
+                <button type="submit" id="btn-macro-predict" class="btn-predict">
+                    <span id="macro-btn-text">Generate Macro Plan</span>
+                    <span class="btn-loader hidden" id="macro-loader"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-col">
+
+            <!-- Macro Result Card -->
+            <div class="result-card glass hidden-result" id="macro-result-card">
+                <p class="result-label">Daily Macro Targets</p>
+                <div class="macro-bars" id="macro-bars">
+                    <div class="macro-row">
+                        <span class="macro-name">Calories</span>
+                        <div class="macro-bar-wrap">
+                            <div class="macro-bar calories-bar" id="bar-calories"></div>
+                        </div>
+                        <span class="macro-val" id="val-calories">--</span>
+                        <span class="macro-unit">kcal</span>
+                    </div>
+                    <div class="macro-row">
+                        <span class="macro-name">Protein</span>
+                        <div class="macro-bar-wrap">
+                            <div class="macro-bar protein-bar" id="bar-protein"></div>
+                        </div>
+                        <span class="macro-val" id="val-protein">--</span>
+                        <span class="macro-unit">g</span>
+                    </div>
+                    <div class="macro-row">
+                        <span class="macro-name">Carbs</span>
+                        <div class="macro-bar-wrap">
+                            <div class="macro-bar carbs-bar" id="bar-carbs"></div>
+                        </div>
+                        <span class="macro-val" id="val-carbs">--</span>
+                        <span class="macro-unit">g</span>
+                    </div>
+                    <div class="macro-row">
+                        <span class="macro-name">Fats</span>
+                        <div class="macro-bar-wrap">
+                            <div class="macro-bar fats-bar" id="bar-fats"></div>
+                        </div>
+                        <span class="macro-val" id="val-fats">--</span>
+                        <span class="macro-unit">g</span>
+                    </div>
+                    <div class="macro-row">
+                        <span class="macro-name">Fiber</span>
+                        <div class="macro-bar-wrap">
+                            <div class="macro-bar fiber-bar" id="bar-fiber"></div>
+                        </div>
+                        <span class="macro-val" id="val-fiber">--</span>
+                        <span class="macro-unit">g</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meal Plan Card -->
+            <div class="result-card glass hidden-result" id="meal-plan-card">
+                <p class="result-label">Recommended Meal Plan</p>
+                <div class="meal-plan-content" id="meal-plan-content">
+                    <div class="meal-plan-loading">Run prediction to see your meal plan</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/model_macro.js"></script>
+</body>
+
+</html>
