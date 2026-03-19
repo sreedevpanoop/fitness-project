@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-RecoverIQ – Fitness Predictor Suite - Flask Backend v2
+FitnessAGNT – Fitness Predictor Suite - Flask Backend v2
 Models: Muscle Recovery | Daily Calories | Macro & Meal Plan
 Database: Supabase (PostgreSQL)
 Auth: Gmail login, email verification, forgot password, unified admin
@@ -29,7 +29,7 @@ db: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 print("[OK] Supabase client connected.")
 
 # ── Admin Config ─────────────────────────────────────────────────────────────
-ADMIN_TOKEN = hashlib.sha256("admin_secret_token_recoveriq".encode()).hexdigest()
+ADMIN_TOKEN = hashlib.sha256("admin_secret_token_fitnessagnt".encode()).hexdigest()
 
 # ── Mail Config (set env vars MAIL_USER and MAIL_PASS before running) ────────
 MAIL_USER = os.environ.get("MAIL_USER", "sreedevpanoop@gmail.com")
@@ -41,6 +41,37 @@ def hash_pw(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 # ── Email sender ─────────────────────────────────────────────────────────────
+# ── Email Templates ────────────────────────────────────────────────────────────
+def email_verification_template(code: str) -> str:
+    return f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #6366f1;">Welcome to FitnessAGNT!</h2>
+        <p>Your 6-digit email verification code is:</p>
+        <div style="background-color: #f3f4f6; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
+          <h1 style="letter-spacing: 5px; margin: 0; color: #1f2937;">{code}</h1>
+        </div>
+        <p style="font-size: 0.9em; color: #6b7280;">This code will expire in 15 minutes.</p>
+        <p>If you did not request this, please ignore this email.</p>
+      </body>
+    </html>
+    """
+
+def email_welcome_template(name: str) -> str:
+    return f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #6366f1;">Account Verified!</h2>
+        <p>Hi {name},</p>
+        <p>Your email has been successfully verified, and your FitnessAGNT account is now fully active.</p>
+        <p>You can now log in and start using our AI models to track your fitness journey.</p>
+        <br/>
+        <p>Stay fit,</p>
+        <p><strong>The FitnessAGNT Team</strong></p>
+      </body>
+    </html>
+    """
+
 def send_email(to_email: str, subject: str, html_body: str) -> bool:
     """Send an HTML email via Gmail SMTP. Returns True on success."""
     if not MAIL_USER or not MAIL_PASS:
@@ -49,7 +80,7 @@ def send_email(to_email: str, subject: str, html_body: str) -> bool:
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"]    = f"RecoverIQ <{MAIL_USER}>"
+        msg["From"]    = f"FitnessAGNT <{MAIL_USER}>"
         msg["To"]      = to_email
         msg.attach(MIMEText(html_body, "html"))
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
@@ -82,20 +113,20 @@ def email_welcome_template(display_name: str) -> str:
 def email_verification_template(code: str) -> str:
     return f"""
     <div style="font-family:Arial,sans-serif;background:#0d1117;color:#e6edf3;padding:40px;border-radius:12px;max-width:500px;margin:auto;">
-      <h2 style="color:#00e5ff;margin-bottom:8px;">RecoverIQ</h2>
+      <h2 style="color:#00e5ff;margin-bottom:8px;">FitnessAGNT</h2>
       <p style="color:#8b949e;margin-bottom:24px;">AI-Powered Fitness Predictor</p>
       <h3 style="margin-bottom:16px;">Verify your email address</h3>
       <p>Use the code below to complete your registration. It expires in <strong>15 minutes</strong>.</p>
       <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:24px;text-align:center;margin:24px 0;">
         <span style="font-size:40px;font-weight:800;letter-spacing:12px;color:#00e5ff;">{code}</span>
       </div>
-      <p style="color:#8b949e;font-size:13px;">If you didn't create a RecoverIQ account, you can safely ignore this email.</p>
+      <p style="color:#8b949e;font-size:13px;">If you didn't create a FitnessAGNT account, you can safely ignore this email.</p>
     </div>"""
 
 def email_reset_template(reset_url: str) -> str:
     return f"""
     <div style="font-family:Arial,sans-serif;background:#0d1117;color:#e6edf3;padding:40px;border-radius:12px;max-width:500px;margin:auto;">
-      <h2 style="color:#00e5ff;margin-bottom:8px;">RecoverIQ</h2>
+      <h2 style="color:#00e5ff;margin-bottom:8px;">FitnessAGNT</h2>
       <p style="color:#8b949e;margin-bottom:24px;">AI-Powered Fitness Predictor</p>
       <h3 style="margin-bottom:16px;">Reset your password</h3>
       <p>Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
@@ -182,15 +213,34 @@ def register():
 
     if not email or not password:
         return jsonify({"success": False, "error": "Email and password required."}), 400
-    if "@" not in email or "." not in email.split("@")[-1]:
+    if "@" not in email or "." not in email:
         return jsonify({"success": False, "error": "Please enter a valid email address."}), 400
+    
+    # Restrict to working domains
+    allowed_domains = {"gmail.com", "yahoo.com", "ymail.com", "outlook.com", "hotmail.com", "live.com", "icloud.com", "me.com", "mac.com", "aol.com", "protonmail.com", "proton.me", "zoho.com"}
+    domain = email.split("@")[-1].lower()
+    if domain not in allowed_domains:
+        return jsonify({"success": False, "error": f"Please use a popular email provider (e.g. gmail.com, yahoo.com). '{domain}' is not supported."}), 400
+
     if len(password) < 6:
         return jsonify({"success": False, "error": "Password must be at least 6 characters."}), 400
 
-    # Check if email already exists
-    existing = db.table("users").select("id").eq("email", email).execute()
+    # Check if a verified account already exists
+    existing = db.table("users").select("id, is_verified").eq("email", email).execute()
     if existing.data:
-        return jsonify({"success": False, "error": "An account with this email already exists."}), 409
+        user_row = existing.data[0]
+        if user_row.get("is_verified"):
+            return jsonify({"success": False, "error": "An account with this email already exists."}), 409
+        else:
+            # Account exists but is unverified — update password and resend OTP
+            db.table("users").update({"password_hash": hash_pw(password)}).eq("email", email).execute()
+            _send_verification_code(email)
+            return jsonify({
+                "success": True,
+                "pending_verification": True,
+                "email": email,
+                "message": "A verification code has been sent to your email."
+            })
 
     # Optional profile fields collected at registration
     age    = data.get("age")
@@ -201,7 +251,7 @@ def register():
     new_user = {
         "email":            email,
         "password_hash":    hash_pw(password),
-        "is_verified":      True,
+        "is_verified":      False,   # Must verify via OTP before accessing the app
         "prediction_count": 0,
     }
     if age    is not None: new_user["age"]    = int(age)
@@ -211,15 +261,14 @@ def register():
 
     db.table("users").insert(new_user).execute()
 
-    display_name = email.split("@")[0]
-    # Send welcome email (non-blocking — failure doesn't break registration)
-    send_email(email, "Welcome to FitnessAGNT!", email_welcome_template(display_name))
+    # Send OTP verification code
+    _send_verification_code(email)
 
     return jsonify({
-        "success":      True,
-        "username":     email,
-        "display_name": display_name,
-        "message":      "Account created successfully!"
+        "success": True,
+        "pending_verification": True,
+        "email": email,
+        "message": "A 6-digit verification code has been sent to your email."
     })
 
 def _send_verification_code(email: str) -> bool:
@@ -234,7 +283,7 @@ def _send_verification_code(email: str) -> bool:
         "expires_at": expires_at,
         "used":       False
     }).execute()
-    return send_email(email, "RecoverIQ – Your Verification Code", email_verification_template(code))
+    return send_email(email, "FitnessAGNT – Your Verification Code", email_verification_template(code))
 
 @app.route("/api/verify_email", methods=["POST"])
 def verify_email():
@@ -250,7 +299,7 @@ def verify_email():
           .select("id, code, expires_at, used")
           .eq("email", email)
           .eq("used", False)
-          .order("created_at", desc=True)
+          .order("expires_at", desc=True)
           .limit(1)
           .execute()
     )
@@ -262,7 +311,7 @@ def verify_email():
     expires_at = datetime.datetime.fromisoformat(row["expires_at"].replace("Z", "+00:00"))
     now_utc    = datetime.datetime.now(datetime.timezone.utc)
     if now_utc > expires_at:
-        return jsonify({"success": False, "error": "Code expired. Please register again to get a new code."}), 400
+        return jsonify({"success": False, "error": "Code expired. Please request a new one."}), 400
     if row["code"] != code:
         return jsonify({"success": False, "error": "Incorrect code. Please try again."}), 400
 
@@ -270,8 +319,31 @@ def verify_email():
     db.table("email_verifications").update({"used": True}).eq("id", row["id"]).execute()
     db.table("users").update({"is_verified": True}).eq("email", email).execute()
 
+    # Send welcome email now that the account is fully verified
     display_name = email.split("@")[0]
+    send_email(email, "Welcome to FitnessAGNT!", email_welcome_template(display_name))
+
     return jsonify({"success": True, "username": email, "display_name": display_name})
+
+# ── Resend OTP code ───────────────────────────────────────────────────────────
+@app.route("/api/resend_code", methods=["POST"])
+def resend_code():
+    """Resend a fresh OTP for an email that is pending verification."""
+    data  = request.get_json(force=True)
+    email = data.get("email", "").strip().lower()
+    if not email:
+        return jsonify({"success": False, "error": "Email required."}), 400
+    # Only allow resend for unverified accounts
+    user_res = db.table("users").select("is_verified").eq("email", email).execute()
+    if not user_res.data:
+        return jsonify({"success": False, "error": "No account found for this email."}), 404
+    if user_res.data[0].get("is_verified"):
+        return jsonify({"success": False, "error": "This account is already verified."}), 400
+    sent = _send_verification_code(email)
+    if sent:
+        return jsonify({"success": True, "message": "A new code has been sent to your email."})
+    return jsonify({"success": False, "error": "Failed to send email. Please try again."}), 500
+
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -311,8 +383,14 @@ def login():
     if user["password_hash"] != hash_pw(password):
         return jsonify({"success": False, "error": "Invalid email or password."}), 401
     if not user.get("is_verified"):
-        # Fix legacy unverified accounts — mark as verified and allow login
-        db.table("users").update({"is_verified": True}).eq("email", email).execute()
+        # Account exists but email is unverified — resend OTP and block login
+        _send_verification_code(email)
+        return jsonify({
+            "success": False,
+            "pending_verification": True,
+            "email": email,
+            "error": "Please verify your email. A new code has been sent."
+        }), 403
 
     # Update last_login
     db.table("users").update({"last_login": datetime.datetime.utcnow().isoformat()}).eq("email", email).execute()
@@ -348,7 +426,7 @@ def forgot_password():
             "used":       False
         }).execute()
         reset_url = f"{APP_BASE_URL}/reset_password.html?token={token}"
-        send_email(email, "RecoverIQ – Reset Your Password", email_reset_template(reset_url))
+        send_email(email, "FitnessAGNT – Reset Your Password", email_reset_template(reset_url))
 
     # Always return success (prevents email enumeration)
     return jsonify({"success": True, "message": "If that email is registered, a reset link has been sent."})
@@ -515,7 +593,7 @@ def admin_delete_user():
     data  = request.get_json(force=True)
     email = data.get("email", "").strip().lower()
 
-    if email == "admin@recoveriq.com":
+    if email == "admin@fitnessagnt.com":
         return jsonify({"success": False, "error": "Cannot delete the admin account."}), 400
 
     res = db.table("users").select("id").eq("email", email).execute()

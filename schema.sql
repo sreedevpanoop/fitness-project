@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
---  RecoverIQ – Supabase PostgreSQL Schema (v2)
+--  FitnessAGNT – Supabase PostgreSQL Schema (v2)
 --  Run in Supabase SQL Editor  →  Table Editor > SQL Editor
 --  Drop all old tables first if migrating from v1
 -- ═══════════════════════════════════════════════════════════════════
@@ -75,11 +75,11 @@ CREATE TABLE IF NOT EXISTS password_resets (
 CREATE INDEX IF NOT EXISTS idx_pr_token ON password_resets (token);
 
 -- ── Seed default admin (run once) ─────────────────────────────────
---  Default: admin@recoveriq.com / admin123
+--  Default: admin@fitnessagnt.com / admin123
 --  SHA-256 of "admin123" = 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
 INSERT INTO admins (email, password_hash)
 VALUES (
-    'admin@recoveriq.com',
+    'admin@fitnessagnt.com',
     '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
 )
 ON CONFLICT (email) DO NOTHING;

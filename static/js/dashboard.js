@@ -1,8 +1,17 @@
 /* dashboard.js – Navigation hub session guard, greeting, and profile editor */
 
 const userJSON = sessionStorage.getItem('user');
-if (!userJSON) { window.location.href = 'index.html'; }
+if (!userJSON) { window.location.replace('index.html'); }
 const currentUser = JSON.parse(userJSON || '{}');
+
+// ── bfcache guard: fires when Chrome restores page from back-forward cache ────
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted || (window.performance && window.performance.getEntriesByType('navigation')[0]?.type === 'back_forward')) {
+        if (!sessionStorage.getItem('user')) {
+            window.location.replace('index.html');
+        }
+    }
+});
 
 let profileGender = 'Male';
 

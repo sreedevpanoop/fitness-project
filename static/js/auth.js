@@ -2,8 +2,12 @@
 
 const API = '';  // same origin
 
-// ── Pending verification state ────────────────────────────────────────────────
-let pendingVerifyEmail = '';
+// ── Pending verification state (backed by sessionStorage so it survives refreshes) ──
+function getPendingEmail() { return sessionStorage.getItem('pending_verify_email') || ''; }
+function setPendingEmail(email) {
+  if (email) sessionStorage.setItem('pending_verify_email', email);
+  else sessionStorage.removeItem('pending_verify_email');
+}
 
 // ── Registration profile gender state ────────────────────────────────────────
 let regGender = 'Male';
@@ -38,6 +42,7 @@ function showTab(tab) {
     document.getElementById('form-register').classList.remove('hidden');
     document.getElementById('tab-login').classList.remove('active');
     document.getElementById('tab-register').classList.add('active');
+    setPendingEmail('');  // Cancel any pending verification when going back to register
   } else if (tab === 'verify') {
     document.getElementById('panel-verify').classList.remove('hidden');
   } else if (tab === 'forgot') {
@@ -45,6 +50,15 @@ function showTab(tab) {
   }
   clearAlert();
 }
+
+// ── On page load: restore verify panel if a pending email is stored ───────────
+document.addEventListener('DOMContentLoaded', function () {
+  const pendingEmail = getPendingEmail();
+  if (pendingEmail) {
+    document.getElementById('verify-email-display').textContent = pendingEmail;
+    showTab('verify');
+  }
+});
 
 function showForgot() { showTab('forgot'); }
 
@@ -73,7 +87,11 @@ function setLoading(btnId, loading) {
 }
 
 function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  
+  const allowedDomains = ["gmail.com", "yahoo.com", "ymail.com", "outlook.com", "hotmail.com", "live.com", "icloud.com", "me.com", "mac.com", "aol.com", "protonmail.com", "proton.me", "zoho.com"];
+  const domain = email.split('@')[1].toLowerCase();
+  return allowedDomains.includes(domain);
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
@@ -95,9 +113,15 @@ async function handleLogin(e) {
     });
     const data = await res.json();
 
-    if (data.success) {
+    if (data.success && data.pending_verification) {
+      // Registration sent OTP — show verify panel
+      setPendingEmail(data.email || email);
+      document.getElementById('verify-email-display').textContent = getPendingEmail();
+      showTab('verify');
+      showAlert('A 6-digit code has been sent to ' + getPendingEmail() + '. Please check your inbox.', 'success');
+    } else if (data.success) {
+      // Direct login (admin or already verified edge case)
       if (data.role === 'admin') {
-        // Store admin token + session then go to admin panel
         sessionStorage.setItem('admin_token', data.token);
         sessionStorage.setItem('user', JSON.stringify({
           username:     data.username,
@@ -108,7 +132,6 @@ async function handleLogin(e) {
         showAlert('Welcome, Admin! Redirecting…', 'success');
         setTimeout(() => { window.location.href = 'admin.html'; }, 800);
       } else {
-        // Normal user
         sessionStorage.setItem('user', JSON.stringify({
           username:     data.username,
           display_name: data.display_name,
@@ -119,11 +142,11 @@ async function handleLogin(e) {
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
       }
     } else if (data.pending_verification) {
-      // Unverified account — show verify panel
-      pendingVerifyEmail = data.email || email;
-      document.getElementById('verify-email-display').textContent = pendingVerifyEmail;
+      // Password matched but email unverified — show OTP panel
+      setPendingEmail(data.email || email);
+      document.getElementById('verify-email-display').textContent = getPendingEmail();
       showTab('verify');
-      showAlert('A new verification code has been sent to your Gmail.', 'success');
+      showAlert('Please verify your email. A new code has been sent to ' + getPendingEmail() + '.', 'success');
     } else {
       showAlert(data.error || 'Login failed.');
     }
@@ -166,8 +189,14 @@ async function handleRegister(e) {
     });
     const data = await res.json();
 
-    if (data.success) {
-      // Account created — log in immediately
+    if (data.success && data.pending_verification) {
+      // Registration succeeded — show OTP verification panel
+      setPendingEmail(data.email || email);
+      document.getElementById('verify-email-display').textContent = getPendingEmail();
+      showTab('verify');
+      showAlert('Check your inbox! Enter the 6-digit code sent to ' + getPendingEmail() + '.', 'success');
+    } else if (data.success) {
+      // Edge case: direct login without needing verification
       sessionStorage.setItem('user', JSON.stringify({
         username:     data.username,
         display_name: data.display_name,
@@ -189,27 +218,30 @@ async function handleRegister(e) {
 // ── VERIFY EMAIL ──────────────────────────────────────────────────────────────
 async function handleVerifyCode() {
   clearAlert();
-  const code = document.getElementById('verify-code').value.trim();
+  const code  = document.getElementById('verify-code').value.trim();
+  const email = getPendingEmail();
   if (!code || code.length !== 6) { showAlert('Please enter the 6-digit code.'); return; }
+  if (!email) { showAlert('Session expired. Please register again.'); showTab('register'); return; }
 
   setLoading('btn-verify', true);
   try {
     const res  = await fetch(`${API}/api/verify_email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: pendingVerifyEmail, code })
+      body: JSON.stringify({ email, code })
     });
     const data = await res.json();
 
     if (data.success) {
+      setPendingEmail('');  // Clear pending state on success
       sessionStorage.setItem('user', JSON.stringify({
         username:     data.username,
         display_name: data.display_name,
         isGuest:      false,
         isAdmin:      false
       }));
-      showAlert('Email verified! Welcome to RecoverIQ!', 'success');
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+      showAlert('Email verified! Welcome to FitnessAGNT!', 'success');
+      setTimeout(() => { window.location.replace('dashboard.html'); }, 1000);
     } else {
       showAlert(data.error || 'Verification failed.');
     }
@@ -222,18 +254,22 @@ async function handleVerifyCode() {
 
 async function handleResendCode() {
   clearAlert();
-  if (!pendingVerifyEmail) { showAlert('No email to resend to. Please register again.'); return; }
+  const email = getPendingEmail();
+  if (!email) { showAlert('No email to resend to. Please register again.'); return; }
   try {
-    // Re-register with same email triggers resend
-    await fetch(`${API}/api/register`, {
+    const res  = await fetch(`${API}/api/resend_code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: pendingVerifyEmail, password: '________resend' }) // triggers resend path
+      body: JSON.stringify({ email: pendingVerifyEmail })
     });
-    // Actually just call a simple resend — use forgot as fallback if no dedicated endpoint
-    showAlert('A new code has been sent to your Gmail.', 'success');
+    const data = await res.json();
+    if (data.success) {
+      showAlert('A new code has been sent to ' + pendingVerifyEmail + '.', 'success');
+    } else {
+      showAlert(data.error || 'Could not resend code. Please try again.');
+    }
   } catch {
-    showAlert('Could not resend. Please try again.');
+    showAlert('Could not reach the server. Please try again.');
   }
 }
 

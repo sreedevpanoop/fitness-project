@@ -1,8 +1,17 @@
 /* model_calories.js – Calorie predictor frontend logic */
 
 const userJSON = sessionStorage.getItem('user');
-if (!userJSON) { window.location.href = 'index.html'; }
+if (!userJSON) { window.location.replace('index.html'); }
 const currentUser = JSON.parse(userJSON || '{}');
+
+// ── bfcache guard ─────────────────────────────────────────────────────────────
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted || (window.performance && window.performance.getEntriesByType('navigation')[0]?.type === 'back_forward')) {
+        if (!sessionStorage.getItem('user')) {
+            window.location.replace('index.html');
+        }
+    }
+});
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -26,7 +35,7 @@ async function loadUserProfile() {
 
 function logout() {
     sessionStorage.removeItem('user');
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────

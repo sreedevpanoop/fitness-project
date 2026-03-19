@@ -2,6 +2,15 @@
 
 const ADMIN_TOKEN_KEY = 'admin_token';
 
+// ── bfcache guard ─────────────────────────────────────────────────────────────
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted || (window.performance && window.performance.getEntriesByType('navigation')[0]?.type === 'back_forward')) {
+        if (!sessionStorage.getItem(ADMIN_TOKEN_KEY) || !sessionStorage.getItem('user')) {
+            window.location.replace('index.html');
+        }
+    }
+});
+
 // Chart instances (kept to allow destroy/re-render on refresh)
 let chartSignups   = null;
 let chartModels    = null;
@@ -30,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function adminLogout() {
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
     sessionStorage.removeItem('user');
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
 }
 
 // ── Load All Data ─────────────────────────────────────────────────────────────

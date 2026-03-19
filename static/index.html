@@ -244,6 +244,22 @@
     </div>
   </div>
 
+  <script>
+    // If already logged in, redirect away from the login page
+    (function () {
+      const u = sessionStorage.getItem('user');
+      if (u) {
+        try {
+          const user = JSON.parse(u);
+          if (user && !user.isGuest) {
+            window.location.replace(user.isAdmin ? 'admin.html' : 'dashboard.html');
+          } else if (user && user.isGuest) {
+            window.location.replace('dashboard.html');
+          }
+        } catch (e) { sessionStorage.removeItem('user'); }
+      }
+    })();
+  </script>
   <script src="js/auth.js"></script>
 </body>
 
