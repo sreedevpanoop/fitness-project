@@ -6,6 +6,8 @@ Database: Supabase (PostgreSQL)
 Auth: Gmail login, email verification, forgot password, unified admin
 """
 import sys, io, os, json, pickle, hashlib, datetime, secrets, smtplib, random
+from dotenv import load_dotenv
+load_dotenv()
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -23,17 +25,17 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 app = Flask(__name__, static_folder=STATIC_DIR)
 
 # ── Supabase Config ──────────────────────────────────────────────────────────
-SUPABASE_URL = "https://sftrlxvbtpjrlbwxzaat.supabase.co"
-SUPABASE_KEY = "sb_publishable_DqLxzaMjX6IRG8S3F4TR8A_fnuecer-"
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 db: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 print("[OK] Supabase client connected.")
 
 # ── Admin Config ─────────────────────────────────────────────────────────────
 ADMIN_TOKEN = hashlib.sha256("admin_secret_token_fitnessagnt".encode()).hexdigest()
 
-# ── Mail Config (set env vars MAIL_USER and MAIL_PASS before running) ────────
-MAIL_USER = os.environ.get("MAIL_USER", "sreedevpanoop@gmail.com")
-MAIL_PASS = os.environ.get("MAIL_PASS", "dygnpfkowoizdgni")   # 16-char Gmail App Password
+# ── Mail Config ──────────────────────────────────────────────────────────────
+MAIL_USER    = os.environ.get("MAIL_USER", "")
+MAIL_PASS    = os.environ.get("MAIL_PASS", "")
 APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://127.0.0.1:5000")
 
 # ── Password hashing ─────────────────────────────────────────────────────────
@@ -140,14 +142,19 @@ def email_reset_template(reset_url: str) -> str:
 # ── Admin seed ───────────────────────────────────────────────────────────────
 def init_admin():
     """Seed default admin if not present."""
+    admin_email = os.environ.get("MAIL_USER", "")
+    admin_pass  = os.environ.get("ADMIN_PASSWORD", "")
+    if not admin_email or not admin_pass:
+        print("[WARN] MAIL_USER or ADMIN_PASSWORD not set – skipping admin seed.")
+        return
     try:
-        res = db.table("admins").select("id").eq("email", "sreedevpanoop@gmail.com").execute()
+        res = db.table("admins").select("id").eq("email", admin_email).execute()
         if not res.data:
             db.table("admins").insert({
-                "email": "sreedevpanoop@gmail.com",
-                "password_hash": hash_pw("admin@211")
+                "email": admin_email,
+                "password_hash": hash_pw(admin_pass)
             }).execute()
-            print("[OK] Default admin seeded: sreedevpanoop@gmail.com / admin@211")
+            print(f"[OK] Default admin seeded: {admin_email}")
         else:
             print("[OK] Admin account exists.")
     except Exception as e:
